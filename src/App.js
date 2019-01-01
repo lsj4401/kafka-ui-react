@@ -1,24 +1,34 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
+import Websocket from 'react-websocket';
 import './App.css';
 
 class App extends Component {
+  zookeeperMessage = '';
+
+  state = {
+    message: ''
+  };
+
+  handleData(data) {
+    this.zookeeperMessage += data + '\n';
+    this.setState({
+      message: this.zookeeperMessage
+    });
+  }
+
+  zookeeperStart = () => {};
+  kafkaStart = () => {};
+
   render() {
     return (
       <div className="App">
+        <Websocket url='ws://localhost:9090' onMessage={this.handleData.bind(this)}/>
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
+          <button onClick={this.zookeeperStart}>ZookeeperStart</button>
+          <textarea value={this.state.message} />
+
+          <button onClick={this.kafkaStart}>KafkaStart</button>
+          <textarea value={this.state.message} />
         </header>
       </div>
     );
