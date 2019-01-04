@@ -2,26 +2,52 @@ const {app, BrowserWindow} = require('electron');
 const express = require('express');
 // const bodyParser = require('body-parser');
 const server = express();
+const cors = require('cors');
+server.use(cors());
 // const path = require('path');
 // server.use(express.static(path.join(__dirname, 'build')));
 //
 const {spawn} = require('child_process');
-server.get('/process', function (req, res) {
-  const zookeeper = spawn('./src/kafka/bin/zookeeper-server-start.sh', ['./src/kafka/config/zookeeper.properties']);
+
+const binUrl = './src/kafka/bin/';
+server.get('/zookeeperStart', function (req, res) {
+  const zookeeper = spawn(binUrl + 'zookeeper-server-start.sh', ['./src/kafka/config/zookeeper.properties']);
   zookeeper.stdout.on('data', function (data) {
     if (localWs !== null) {
-      console.log(`${data}`);
-      localWs.send(`${data}`);
+      localWs.send(JSON.stringify({
+        kafkaMessage: '',
+        zookeeperMessage: `${data}`
+      }));
     }
   });
   return res.send('ok');
+});
+
+server.get('/kafkaStart', function (req, res) {
+  const zookeeper = spawn(binUrl + 'kafka-server-start.sh', ['./src/kafka/config/server.properties']);
+  zookeeper.stdout.on('data', function (data) {
+    if (localWs !== null) {
+      localWs.send(JSON.stringify({
+        kafkaMessage: `${data}`,
+        zookeeperMessage: ''
+      }));
+    }
+  });
+  return res.send('ok');
+});
+
+server.get('/listTopic', function (req, res) {
+  const listTopic = spawn(binUrl + 'kafka-topics.sh', ['--list', '--zookeeper', 'localhost:2181']);
+  listTopic.stdout.on('data', function (data) {
+    res.send(data);
+  });
 });
 //
 // server.get('/', function (req, res) {
 //   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 // });
 //
-server.listen(process.env.PORT || 8080);
+server.listen(9999);
 
 const WebSocketServer = require("ws").Server;
 const wss = new WebSocketServer({ port: 9090 });
@@ -30,7 +56,6 @@ const wss = new WebSocketServer({ port: 9090 });
 let localWs = null;
 wss.on("connection", function(ws) {
   localWs = ws;
-  ws.send("Hello! I am a server.");
   ws.on("message", function(message) {
     console.log("Received: %s", message);
   });
