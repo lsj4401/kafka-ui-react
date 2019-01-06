@@ -15,6 +15,8 @@
     "react-select": "^2.2.0",
     "react-websocket": "^2.0.0",
     "reactstrap": "^7.0.2",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
     "ws": "^6.1.2"
   },
   "scripts": {
@@ -26,9 +28,8 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "main": "main.js",
-  "proxy": "http://localhost:9999",
   "BROWSER": "none",
+  "main": "main.js",
   "browserslist": [
     ">0.2%",
     "not dead",

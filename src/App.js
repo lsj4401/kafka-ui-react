@@ -1,77 +1,37 @@
 import React, {Component} from 'react';
-import { Button, Container } from 'reactstrap';
-import Websocket from 'react-websocket';
-import ajax from 'axios';
-import URLS from './utils/Constansts'
-import Select from 'react-select';
+import {Col, Container, Row} from 'reactstrap';
+import MessageReceiverConsole from './components/MessageReceiverConsole'
+import SideMenu from "./layer/SideMenu";
 import './App.css';
-
-const options = [];
+import KafkaMessageSender from "./components/KafkaMessageSender";
 
 class App extends Component {
-  zookeeperMessage = '';
-  kafkaMessage = '';
 
   state = {
-    selectedOption: null,
-    kafkaMessage: '',
-    zookeeperMessage: ''
-  };
-
-
-
-  handleData(data) {
-    const message = JSON.parse(data);
-    this.zookeeperMessage += message.zookeeperMessage || '';
-    this.kafkaMessage += message.kafkaMessage || '';
-    this.setState({
-      kafkaMessage: this.kafkaMessage,
-      zookeeperMessage: this.zookeeperMessage
-    });
-  }
-
-  zookeeperStart = () => {
-    ajax.get(URLS.psService('/zookeeperStart'))
-  };
-  kafkaStart = () => {
-    ajax.get(URLS.psService('/kafkaStart'))
-  };
-
-  onKafkaChangeText(e) {
-    this.setState({kafkaMessage: e.target.value});
-  };
-
-  onZookeeperChangeText(e) {
-    this.setState({zookeeperMessage: e.target.value});
-  };
-
-  handleChange = (selectedOption) => {
-    this.setState({selectedOption});
-    console.log(`Option selected:`, selectedOption);
+    kafkaLog: '',
+    topicConsumer: ''
   };
 
   render() {
-    const {selectedOption} = this.state;
-
     return (
       <Container>
-        <Websocket url='ws://localhost:9090' onMessage={this.handleData.bind(this)}/>
-        <div className={'col-12'}>
-          <Select
-            value={selectedOption}
-            onChange={this.handleChange}
-            options={options}
-          />
-        </div>
-        <br/>
-        <div className={'col-12'}>
-          <Button className={'col-12'} onClick={this.zookeeperStart}>ZookeeperStart</Button>
-          <textarea className={'col-12'} onChange={this.onZookeeperChangeText} value={this.state.zookeeperMessage}/>
-        </div>
-        <div className={'col-12'}>
-          <Button className={'col-12'} onClick={this.kafkaStart}>KafkaStart</Button>
-          <textarea className={'col-12'} onChange={this.onKafkaChangeText} value={this.state.kafkaMessage}/>
-        </div>
+        <Row>
+          <Col sm={12} style={{backgroundColor: '#3c3f41', marginTop: '10px'}}>
+          </Col>
+        </Row>
+        <Row>
+          <Col sm={4}>
+            <SideMenu/>
+          </Col>
+          <Col sm={8}>
+            <div>
+              <KafkaMessageSender />
+              <MessageReceiverConsole size={12} receiveMessageName='topicConsumer' />
+              <MessageReceiverConsole size={5} receiveMessageName='kafkaLog' />
+            </div>
+          </Col>
+        </Row>
+
       </Container>
     );
   }
