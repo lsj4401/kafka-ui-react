@@ -3,7 +3,7 @@ import {Col, Container, Row} from 'reactstrap';
 import MessageReceiverConsole from './components/MessageReceiverConsole'
 import SideMenu from "./layer/SideMenu";
 import './App.css';
-import KafkaMessageSender from "./components/KafkaMessageSender";
+import MessageInputSender from "./components/MessageInputSender";
 
 class App extends Component {
 
@@ -25,7 +25,7 @@ class App extends Component {
           </Col>
           <Col sm={8}>
             <div>
-              <KafkaMessageSender />
+              <MessageInputSender />
               <MessageReceiverConsole size={12} receiveMessageName='topicConsumer' />
               <MessageReceiverConsole size={5} receiveMessageName='kafkaLog' />
             </div>

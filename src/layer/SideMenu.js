@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
-import {Button, Row} from "reactstrap";
+import {Button, Row, Col} from "reactstrap";
 import ajax from "axios";
 import URLS from "../utils/Constansts";
 import KafkaTopics from "../components/KafkaTopics";
-import Col from "reactstrap/es/Col";
+import MessageInputSender from "../components/MessageInputSender";
 
 class SideMenu extends Component {
   state = {
@@ -36,6 +36,7 @@ class SideMenu extends Component {
       <div>
         <Row onClick={this.loadOptions}>
           <Col sm={12} style={{ marginBottom: '1rem' }}>
+            <MessageInputSender url={'/kafka-path'} buttonLabel={'SET'}/>
             <KafkaTopics options={this.state.options}/>
           </Col>
         </Row>

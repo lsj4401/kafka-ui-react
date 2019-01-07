@@ -33,7 +33,7 @@ class MessageReceiverConsole extends Component {
       <div>
         <Label>Kafka Console Log</Label>
         <textarea rows={this.props.size} className={'col-12'} ref={console => this.console = console}
-                  onChange={this.handleChange}
+                  onChange={this.handleChange.bind(this)}
                   value={this.state.message}/>
       </div>
     )

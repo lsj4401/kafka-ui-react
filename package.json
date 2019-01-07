@@ -2,13 +2,15 @@
   "name": "kafka-ui",
   "version": "0.1.0",
   "private": true,
+  "main": "src/electron-starter.js",
+  "homepage": "./",
   "dependencies": {
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "bootstrap": "^4.2.1",
     "cors": "^2.8.5",
-    "electron": "^4.0.0",
     "express": "^4.16.4",
+    "jquery": "^3.3.1",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-scripts": "2.1.2",
@@ -20,20 +22,35 @@
     "ws": "^6.1.2"
   },
   "scripts": {
-    "start": "react-scripts start & electron .",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "react-start": "react-scripts start",
+    "react-build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "electron": "electron .",
+    "start": "nf start",
+    "dist": "yarn run react-build && electron-builder",
+    "testbuild": "electron-builder"
   },
   "eslintConfig": {
     "extends": "react-app"
   },
+  "devDependencies": {
+    "electron": "^4.0.1",
+    "electron-builder": "^20.38.4",
+    "foreman": "^3.0.1"
+  },
   "BROWSER": "none",
-  "main": "main.js",
   "browserslist": [
     ">0.2%",
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "build": {
+    "extends": null,
+    "directories": {
+      "buildResources": "public"
+    },
+    "target": "dmg"
+  }
 }
