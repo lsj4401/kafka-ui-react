@@ -3,15 +3,22 @@ const http = require("http");
 const app = express();
 const cors = require('cors');
 const {spawn, exec} = require('child_process');
+const bodyParser = require('body-parser');
 const path = require('path');
 
 // const binUrl = path.join(__dirname, '/./kafka/bin/');
-let binUrl = '/usr/local/kafka_2.11-2.1.0';
 
 const server = http.createServer(app);
 const socketIo = require("socket.io")(server);
+
 app.use(cors());
+app.use(bodyParser.json());       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
+
 exports.init = function () {
+  let binUrl = '/usr/local/kafka_2.11-2.1.0';
   let zookeeper = null;
   let consumer = null;
   let kafka = null;
@@ -86,5 +93,6 @@ exports.init = function () {
   });
 
   server.listen(9999);
-  socketIo.on("connection", socket => {});
+  socketIo.on("connection", socket => {
+  });
 };

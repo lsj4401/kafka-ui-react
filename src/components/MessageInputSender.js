@@ -4,7 +4,7 @@ import ajax from "axios";
 import URLS from "../utils/Constansts";
 
 class MessageInputSender extends Component {
-  defaultProps = {
+  static defaultProps = {
     buttonLabel: 'send'
   };
   urlPath = '';
