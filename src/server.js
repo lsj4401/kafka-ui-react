@@ -5,7 +5,8 @@ const cors = require('cors');
 const {spawn, exec} = require('child_process');
 const bodyParser = require('body-parser');
 const path = require('path');
-
+const fs = require('fs');
+const readline = require('readline');
 // const binUrl = path.join(__dirname, '/./kafka/bin/');
 
 const server = http.createServer(app);
@@ -18,18 +19,52 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 
 exports.init = function () {
-  let binUrl = '/usr/local/kafka_2.11-2.1.0';
+  let binUrl = '';
   let zookeeper = null;
   let consumer = null;
   let kafka = null;
 
-  app.post('/kafka-path', function (req, res) {
-    console.log(req.body.message);
-    binUrl = req.body.message;
-    return res.send('kafka-path : ' + binUrl);
+  app.use((req, res, next) => {
+    // res.end(req.url);
+    // if (binUrl === '' && req.url !== '/kafka-path') {
+    //   console.log('url not set');
+    //   res.send('url is not set');
+    // } else {
+      next();
+    // }
   });
 
-  app.get('/pwd', function (req, res) {
+  app.get('/init', (req, res) => {
+    const executePath = './properties';
+    if (!fs.existsSync(executePath)) {
+      return res.send('');
+    }
+
+    const readline = require('readline');
+    const inputStream = fs.createReadStream('./properties');
+    const outputStream = new (require('stream'))();
+    const rl = readline.createInterface(inputStream, outputStream);
+
+    rl.on('line', function (line) {
+      binUrl = line;
+      res.send(line);
+    });
+
+    rl.on('close', function (line) {
+    });
+  });
+
+  app.post('/kafka-path', (req, res) => {
+    binUrl = req.body.message;
+    fs.writeFile('./properties', binUrl, function (err) {
+      if (err) {
+        console.log(err);
+      }
+    });
+    res.send('ok');
+  });
+
+  app.get('/pwd', (req, res) => {
     exec('pwd', (err, stdout, stderr) => {
       if (err) {
         res.send(stdout);
@@ -38,15 +73,17 @@ exports.init = function () {
     });
   });
 
-  app.get('/zookeeperStart', function (req, res) {
+  app.get('/zookeeperStart', (req, res) => {
     if (zookeeper !== null) {
       zookeeper.kill()
     }
-
-    zookeeper = spawn(binUrl + '/bin/zookeeper-server-start.sh', [binUrl + '/config/zookeeper.properties']);
-    zookeeper.stdout.on('data', function (data) {
-      socketIo.emit('kafkaLog', `${data}`);
-    });
+    const executePath = binUrl + '/bin/zookeeper-server-start.sh';
+    if (fs.existsSync(executePath)) {
+      zookeeper = spawn(executePath, [binUrl + '/config/zookeeper.properties']);
+      zookeeper.stdout.on('data', function (data) {
+        socketIo.emit('kafkaLog', `${data}`);
+      });
+    }
     return res.send('ok');
   });
 
@@ -54,11 +91,13 @@ exports.init = function () {
     if (kafka !== null) {
       kafka.kill()
     }
-
-    kafka = spawn(binUrl + '/bin/kafka-server-start.sh', [binUrl + '/config/server.properties']);
-    kafka.stdout.on('data', function (data) {
-      socketIo.emit('kafkaLog', `${data}`);
-    });
+    const executePath = binUrl + '/bin/kafka-server-start.sh';
+    if (fs.existsSync(executePath)) {
+      kafka = spawn(executePath, [binUrl + '/config/server.properties']);
+      kafka.stdout.on('data', function (data) {
+        socketIo.emit('kafkaLog', `${data}`);
+      });
+    }
     return res.send('ok');
   });
 
@@ -67,29 +106,42 @@ exports.init = function () {
     if (consumer !== null) {
       consumer.kill();
     }
-    consumer = spawn(binUrl + '/bin/kafka-console-consumer.sh', ['--bootstrap-server', 'localhost:9092', '--topic', req.params.topics, '--from-beginning']);
-    consumer.stdout.on('data', function (data) {
-      socketIo.emit('topicConsumer', `${data}`);
-    });
+
+    const executePath = binUrl + '/bin/kafka-console-consumer.sh';
+    if (fs.existsSync(executePath)) {
+      consumer = spawn(executePath, ['--bootstrap-server', 'localhost:9092', '--topic', req.params.topics, '--from-beginning']);
+      consumer.stdout.on('data', function (data) {
+        socketIo.emit('topicConsumer', `${data}`);
+      });
+    }
     res.send('ok');
   });
 
-
   app.get('/listTopic', function (req, res) {
-    exec(binUrl + '/bin/kafka-topics.sh --list --zookeeper localhost:2181', (err, stdout, stderr) => {
-      if (err) {
-        res.send(stdout);
-      }
-      res.send({topics: stdout});
-    });
+    const executePath = binUrl + '/bin/kafka-topics.sh';
+    if (fs.existsSync(executePath)) {
+      exec(executePath + ' --list --zookeeper localhost:2181', (err, stdout, stderr) => {
+        if (err) {
+          res.send(stdout);
+        }
+        res.send({topics: stdout});
+      });
+    } else {
+      res.send('ok');
+    }
   });
 
   app.post('/send/:topics', function (req, res) {
-    const message = spawn(binUrl + '/bin/kafka-console-producer.sh', ['--broker-list', 'localhost:9092', '--topic', req.params.topics]);
-    message.stdout.on('data', function (data) {
-      message.stdin.write(req.body.message);
-      message.kill();
-    })
+    const executePath = binUrl + '/bin/kafka-console-producer.sh';
+    if (fs.existsSync(executePath)) {
+      const message = spawn(executePath, ['--broker-list', 'localhost:9092', '--topic', req.params.topics]);
+      message.stdout.on('data', function (data) {
+        message.stdin.write(req.body.message);
+        message.kill();
+      })
+    } else {
+      res.send('ok');
+    }
   });
 
   server.listen(9999);

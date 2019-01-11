@@ -10,6 +10,15 @@ class SideMenu extends Component {
     options: []
   };
 
+  componentDidMount() {
+    ajax.get(URLS.psService('/init'))
+      .then((res) => {
+        this.setState({
+          message: res.data
+        })
+      });
+  }
+
   loadOptions = () => {
     ajax.get(URLS.psService('/listTopic'))
       .then((res) => {
@@ -31,12 +40,14 @@ class SideMenu extends Component {
     ajax.get(URLS.psService('/kafkaStart'));
   };
 
+
+
   render() {
     return (
       <div>
         <Row onClick={this.loadOptions}>
           <Col sm={12} style={{ marginBottom: '1rem' }}>
-            <MessageInputSender url={'/kafka-path'} buttonLabel={'SET'}/>
+            <MessageInputSender message={this.state.message} url={'/kafka-path'} buttonLabel={'SET'}/>
             <KafkaTopics options={this.state.options}/>
           </Col>
         </Row>
