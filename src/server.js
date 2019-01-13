@@ -1,3 +1,4 @@
+const log = require('electron-log');
 const express = require('express');
 const http = require("http");
 const app = express();
@@ -23,6 +24,7 @@ exports.init = function () {
   let zookeeper = null;
   let consumer = null;
   let kafka = null;
+  const propertiesPath = '/tmp/kafka-ui-properties';
 
   app.use((req, res, next) => {
     // res.end(req.url);
@@ -35,15 +37,16 @@ exports.init = function () {
   });
 
   app.get('/init', (req, res) => {
-    const executePath = './properties';
-    if (!fs.existsSync(executePath)) {
+    log.info('init');
+    if (!fs.existsSync(propertiesPath)) {
+      log.info('file not exist');
       return res.send('');
     }
 
     const readline = require('readline');
-    const inputStream = fs.createReadStream('./properties');
-    const outputStream = new (require('stream'))();
-    const rl = readline.createInterface(inputStream, outputStream);
+    const inputStream = fs.createReadStream(propertiesPath);
+    // const outputStream = new (require('stream'))();
+    const rl = readline.createInterface(inputStream); //, outputStream);
 
     rl.on('line', function (line) {
       binUrl = line;
@@ -56,9 +59,9 @@ exports.init = function () {
 
   app.post('/kafka-path', (req, res) => {
     binUrl = req.body.message;
-    fs.writeFile('./properties', binUrl, function (err) {
+    fs.writeFile(propertiesPath, binUrl, function (err) {
       if (err) {
-        console.log(err);
+        log.error(err);
       }
     });
     res.send('ok');
