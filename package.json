@@ -36,7 +36,7 @@
     "extends": "react-app"
   },
   "devDependencies": {
-    "electron": "^4.0.1",
+    "electron": "^9.4.0",
     "electron-builder": "^20.38.4",
     "foreman": "^3.0.1"
   },
